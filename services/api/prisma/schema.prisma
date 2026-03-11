@@ -1,0 +1,211 @@
+// Prisma schema for MySQL (local, no-cost)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum CaseStatus {
+  NEW
+  EVIDENCE_PENDING
+  ROUTED
+  IN_PROGRESS
+  ESCALATED
+  RESOLVED
+  CLOSED
+}
+
+enum CommunicationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+}
+
+enum PaymentType {
+  SUCCESS_FEE
+  SUBSCRIPTION
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum OutcomeType {
+  FULL_REFUND
+  PARTIAL_REFUND
+  REJECTED
+  WITHDRAWN
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  VERIFIED
+}
+
+enum UserRole {
+  CONSUMER
+  AGENT
+  MERCHANT_ADMIN
+  SUPER_ADMIN
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  phone     String?  @unique
+  name      String?
+  role      UserRole @default(CONSUMER)
+  createdAt DateTime @default(now())
+
+  cases   Case[]
+  actions Action[]
+  uploads Evidence[] @relation("EvidenceUploader")
+  payments Payment[]
+  agent   Agent?
+}
+
+model Merchant {
+  id           String   @id @default(cuid())
+  name         String
+  category     String?
+  contactEmail String?
+  createdAt    DateTime @default(now())
+
+  cases Case[]
+}
+
+model Case {
+  id          String     @id @default(cuid())
+  userId      String
+  merchantId  String?
+  status      CaseStatus @default(NEW)
+  category    String
+  amount      Int
+  currency    String
+  priority    String     @default("NORMAL")
+  description String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user        User       @relation(fields: [userId], references: [id])
+  merchant    Merchant?  @relation(fields: [merchantId], references: [id])
+  evidence    Evidence[]
+  actions     Action[]
+  comms       Communication[]
+  outcome     Outcome?
+  payments    Payment[]
+  slaTimers   SlaTimer[]
+}
+
+model Evidence {
+  id         String   @id @default(cuid())
+  caseId     String
+  uploaderId String
+  type       String
+  storageUrl String
+  hashSha256 String   @unique
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  case     Case  @relation(fields: [caseId], references: [id])
+  uploader User  @relation("EvidenceUploader", fields: [uploaderId], references: [id])
+}
+
+model Action {
+  id        String   @id @default(cuid())
+  caseId    String
+  actorId   String
+  type      String
+  notes     String?
+  createdAt DateTime @default(now())
+
+  case  Case @relation(fields: [caseId], references: [id])
+  actor User @relation(fields: [actorId], references: [id])
+}
+
+model Communication {
+  id          String               @id @default(cuid())
+  caseId      String
+  channel     CommunicationChannel
+  toAddress   String
+  templateId  String?
+  status      String
+  providerMsg String?
+  createdAt   DateTime @default(now())
+
+  case Case @relation(fields: [caseId], references: [id])
+}
+
+model Outcome {
+  id                 String            @id @default(cuid())
+  caseId             String            @unique
+  type               OutcomeType
+  refundAmount       Int?
+  refundDate         DateTime?
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  createdAt          DateTime          @default(now())
+
+  case Case @relation(fields: [caseId], references: [id])
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  caseId      String
+  userId      String
+  amount      Int
+  currency    String
+  type        PaymentType
+  status      PaymentStatus @default(PENDING)
+  provider    String
+  providerRef String?
+  createdAt   DateTime @default(now())
+
+  case Case @relation(fields: [caseId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Agent {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  team      String?
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  entityType String
+  entityId   String
+  action     String
+  payload    Json?
+  createdAt  DateTime @default(now())
+}
+
+model RoutingRule {
+  id        String   @id @default(cuid())
+  name      String
+  category  String
+  priority  String   @default("NORMAL")
+  team      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model SlaTimer {
+  id        String   @id @default(cuid())
+  caseId    String
+  dueAt     DateTime
+  status    String   @default("OPEN")
+  createdAt DateTime @default(now())
+
+  case Case @relation(fields: [caseId], references: [id])
+}

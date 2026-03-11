@@ -1,0 +1,27 @@
+{
+  "name": "refund-dispute-recovery-concierge",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace apps/web run dev",
+    "dev:admin": "npm --workspace apps/admin run dev",
+    "dev:merchant": "npm --workspace apps/merchant run dev",
+    "dev:api": "npm --workspace services/api run dev",
+    "dev:worker": "npm --workspace services/worker run dev",
+    "dev": "concurrently -k -n web,admin,merchant,api,worker -c green,cyan,magenta,yellow,blue \"npm run dev:web\" \"npm run dev:admin\" \"npm run dev:merchant\" \"npm run dev:api\" \"npm run dev:worker\"",
+    "build": "npm --workspace services/api run build && npm --workspace services/worker run build && npm --workspace apps/web run build && npm --workspace apps/admin run build && npm --workspace apps/merchant run build",
+    "lint": "npm --workspace services/api run lint && npm --workspace services/worker run lint",
+    "format": "prettier . --check"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0",
+    "playwright": "^1.58.2",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  }
+}
