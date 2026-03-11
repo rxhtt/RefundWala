@@ -16,6 +16,6 @@
 - CSV exports for analytics and reporting
 
 ## Contact
-For collaboration or commercial pilots, contact **rxhtt** via:
+For collaboration or commercial pilots, contact **Rohit Bagewadi** via:
 - GitHub: [https://github.com/rxhtt](https://github.com/rxhtt)
 - Portfolio: [https://portfolio-rohit-teal.vercel.app/](https://portfolio-rohit-teal.vercel.app/)

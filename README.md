@@ -70,7 +70,7 @@ See `docs/collaboration.md` for partnership, integration, and collaboration deta
 See `docs/press-kit.md` for mission, positioning, and demo statistics.
 
 ## Credits
-Built by **rxhtt**  
+Built by **Rohit Bagewadi (rxhtt)**  
 GitHub: [https://github.com/rxhtt](https://github.com/rxhtt)  
 Portfolio: [https://portfolio-rohit-teal.vercel.app/](https://portfolio-rohit-teal.vercel.app/)  
 Email: bagewadirohit07@gmail.com
